@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 53200164bd82e4d44b0df9ca6aa551fd
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - interactableMap: {instanceID: 0}
+  - hiddenInteractableTile: {fileID: 11400000, guid: 7dae50ab9ef43ff499de9a7e192add5c, type: 2}
+  - interectedTile: {fileID: 11400000, guid: 1ad3dc4081e69904faa6df3455beaf2c, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

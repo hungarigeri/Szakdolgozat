@@ -2,19 +2,21 @@ using UnityEngine;
 
 public class FarmingSystem : MonoBehaviour
 {
-    public GameObject cropPrefab; // Inspector-ban húzd ide a Crop prefab-ot
 
     void Update()
     {
+        
+
         if (Input.GetKeyDown(KeyCode.E)) // E gomb vetéshez
         {
-            PlantCrop();
+            Vector3Int position = new Vector3Int((int)transform.position.x, (int)transform.position.y, 0);
+
+            if (GameManager.Instance.tileManager.IsInteractable(position))
+            {
+                GameManager.Instance.tileManager.SetInteracted(position);
+            }
         }
     }
 
-    void PlantCrop()
-    {
-        Vector3 plantPosition = transform.position; // Karakter pozíciója
-        Instantiate(cropPrefab, plantPosition, Quaternion.identity); // Növény létrehozása
-    }
+
 }
