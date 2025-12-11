@@ -1,7 +1,0 @@
-<!-- GenerateUI.uxml -->
-<UXML xmlns="UnityEngine.UIElements" xmlns:ui="Unity.AI.Image.Components">
-    <Style src="./GenerationResultOverlay.uss" />
-    <VisualElement class="GenerationResultOverlay">
-        <ui:GenerationSelector />
-    </VisualElement>
-</UXML>
