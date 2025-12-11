@@ -57,6 +57,7 @@
     <Compile Include="Assets\scripts\InventoryItem.cs" />
     <Compile Include="Assets\scripts\playerController.cs" />
     <Compile Include="Assets\scripts\InventorySlot.cs" />
+    <Compile Include="Assets\scripts\PickableItem.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_ExampleScript_01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMPro_InstructionOverlay.cs" />
     <Compile Include="Assets\scripts\TileManager.cs" />

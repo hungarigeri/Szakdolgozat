@@ -479,6 +479,7 @@
 "Assets/scripts/InventoryItem.cs"
 "Assets/scripts/InventoryManager.cs"
 "Assets/scripts/InventorySlot.cs"
+"Assets/scripts/PickableItem.cs"
 "Assets/scripts/Player.cs"
 "Assets/scripts/playerController.cs"
 "Assets/scripts/ScriptableObjects/Item.cs"

@@ -2196,22 +2196,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1600057914}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 696926327}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 1846283128}
+        m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
+        m_MethodName: OpenInventoryByButton
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2476,6 +2464,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 12b4da769cf3c1e43b2eeec870214909, type: 3}
+--- !u!114 &784354947 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8956574306155213145, guid: 12b4da769cf3c1e43b2eeec870214909, type: 3}
+  m_PrefabInstance: {fileID: 1666945423}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!224 &872476110 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1681042295832196461, guid: 12b4da769cf3c1e43b2eeec870214909, type: 3}
@@ -3098,7 +3097,7 @@ GameObject:
   - component: {fileID: 1210680507}
   m_Layer: 0
   m_Name: player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4483,6 +4482,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: inventorySlot
       objectReference: {fileID: 0}
+    - target: {fileID: 6582431664245552639, guid: 12b4da769cf3c1e43b2eeec870214909, type: 3}
+      propertyPath: Image
+      value: 
+      objectReference: {fileID: 784354947}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5893,7 +5896,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50659ed8d129e4d44b97b0501f899f53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
-  maxStackedItems: 4
+  inventoryUI: {fileID: 1600057914}
+  openInventoryButton: {fileID: 696926327}
+  isInventoryOpen: 1
+  maxStackedItems: 64
   inventorySlots:
   - {fileID: 2082944832}
   - {fileID: 1805089411}
@@ -5924,6 +5930,13 @@ MonoBehaviour:
   - {fileID: 1824349012}
   - {fileID: 1466305440}
   inventoryItemPrefab: {fileID: 7272001633237298249, guid: eeeead2ff04d31e4fbad78ec784c22d7, type: 3}
+  startingItems:
+  - {fileID: 11400000, guid: d65bd0d91a0a451468d543652f8eb686, type: 2}
+  - {fileID: 11400000, guid: e47350b1bbb04b8429b60ea501584630, type: 2}
+  - {fileID: 11400000, guid: e47350b1bbb04b8429b60ea501584630, type: 2}
+  droppedItemPrefab: {fileID: 1752204360746025206, guid: 0d1fa3c0025669d43a375bfa71605a30, type: 3}
+  playerTransform: {fileID: 1210680504}
+  hoveredItem: {fileID: 0}
 --- !u!4 &1846283129
 Transform:
   m_ObjectHideFlags: 0

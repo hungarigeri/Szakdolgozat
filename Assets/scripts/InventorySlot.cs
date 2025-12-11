@@ -7,7 +7,7 @@ public class InventorySlot : MonoBehaviour,IDropHandler
     public Image Image;
     public Color SelectedColor,notSelectedColor;
 
-    public void Start()
+    public void Awake()
     {
         Deselect();
     }

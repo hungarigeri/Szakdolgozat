@@ -2,10 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+// FONTOS: Add hozzá az IPointerEnterHandler és IPointerExitHandler interfészeket a felsoroláshoz!
+public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    
-
     [Header("UI")]
     public Image image;
     public Text countText;  
@@ -28,7 +27,24 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
        countText.gameObject.SetActive(textActive);
     }
 
-    //drag and drop interface methods
+    // --- ÚJ RÉSZ: EGÉR ÉRZÉKELÉSE ---
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        // Ha az egér ráment a tárgyra, szólunk a Managernek
+        InventoryManager.instance.hoveredItem = this;
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        // Ha az egér lement róla, és még mindig ez volt a kiválasztott, töröljük
+        if (InventoryManager.instance.hoveredItem == this)
+        {
+            InventoryManager.instance.hoveredItem = null;
+        }
+    }
+    // --------------------------------
+
+    // Drag and drop metódusok (maradnak a régiek vagy a módosítottak)
     public void OnBeginDrag(PointerEventData eventData)
     {
        image.raycastTarget = false;
@@ -47,6 +63,4 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         image.raycastTarget = true;
         transform.SetParent(parentAfterDrag);
     }
-
-
 }
