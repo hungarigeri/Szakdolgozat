@@ -23,10 +23,12 @@ public enum ItemType
 {
     Building,
     Tool,
+    Ore,
 }
 
 public enum ActionType
 {
    Plant,
-   Mine
+   Mine,
+   Craft,
 }
