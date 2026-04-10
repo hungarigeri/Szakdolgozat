@@ -28,7 +28,8 @@ public enum ItemType
 
 public enum ActionType
 {
-   Plant,
-   Mine,
-   Craft,
+    Plant,
+    Mine,
+    Craft,
+    Storage,
 }

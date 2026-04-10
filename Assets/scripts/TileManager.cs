@@ -13,6 +13,7 @@ public class TileManager : MonoBehaviour
     public Tile hiddenInteractableTile;
     public Tile InterectedTile;
     public Tile munkaasztalTile; // ÚJ: A munkaasztal csempéje
+    public Tile furnaceTile;
 
     void Start()
     {
@@ -74,12 +75,18 @@ public class TileManager : MonoBehaviour
         return true; // Szabad a hely!
     }
 
-    // Leteszi a Munkaasztalt a térképre
-    public void PlaceWorkbench(Vector3Int position)
+    // Leteszi a a buldinget a térképre
+    public void PlaceBuilding(Vector3Int position, string buildingName)
     {
-        if (buildingMap != null && munkaasztalTile != null)
+        if (buildingMap == null) return;
+
+        if (buildingName == "CraftingTable")
         {
             buildingMap.SetTile(position, munkaasztalTile);
+        }
+        else if (buildingName == "Furnace") // ÚJ: Kemence lerakása
+        {
+            buildingMap.SetTile(position, furnaceTile);
         }
     }
 
@@ -93,4 +100,14 @@ public class TileManager : MonoBehaviour
         // Zárójelbe tesszük a neveket, így a "tile != null" mindkettőre vonatkozik
         return tile != null && (tile.name == "Craftingtable_0" || tile.name == "craftingtable_0");
     }
+
+    public bool IsFurnace(Vector3Int position)
+    {
+        if (buildingMap == null) return false;
+        TileBase tile = buildingMap.GetTile(position);
+        // Ide írd a kemence tile pontos nevét (pl. furnace_0)
+        return tile != null && (tile.name == "furnice_0" || tile.name == "Furnice_0");
+    }
 }
+
+
