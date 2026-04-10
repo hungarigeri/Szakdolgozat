@@ -192,7 +192,7 @@ GameObject:
   - component: {fileID: 8225173780397234288}
   - component: {fileID: 8372065632974159240}
   m_Layer: 0
-  m_Name: MiningDrill
+  m_Name: AutomataDrillPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -206,14 +206,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5510672690155361342}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.013205684, z: -0, w: 0.99991286}
-  m_LocalPosition: {x: 233.9606, y: 297.5025, z: 0}
-  m_LocalScale: {x: 0.12229402, y: 0.22755623, z: 1}
+  m_LocalRotation: {x: 0.09580785, y: -0.056660865, z: -0.0022524088, w: 0.9937834}
+  m_LocalPosition: {x: 234.417, y: 297.642, z: -0.015220782}
+  m_LocalScale: {x: 0.17554918, y: 0.25901765, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4596079720873892920}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: -1.513, z: 0}
+  m_LocalEulerAnglesHint: {x: 10.963, y: -6.612, z: -0.895}
 --- !u!212 &947672330375901832
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -260,9 +260,9 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 3
-  m_Sprite: {fileID: 7315958836550786593, guid: 09839fcb19e4d894795b6cf825e1936f, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_SortingOrder: 4
+  m_Sprite: {fileID: -7820668140291238586, guid: c635642735d3dbf4faa2e6ed904041ef, type: 3}
+  m_Color: {r: 0.9103774, g: 0.9623082, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -284,8 +284,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdb13635cddd7ae45b05b7e5b4361f2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MiningDrill
-  canAutoOutput: 0
-  miningInterval: 4
+  canAutoOutput: 1
+  miningInterval: 2
   outputInterval: 1
   maxCapacity: 64
   oreToYield: {fileID: 11400000, guid: d5d3c228a9004e34892d11adebba1722, type: 2}
@@ -325,7 +325,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.13036156, y: -0.5914178}
+  m_Offset: {x: -0.5530708, y: 0.21755981}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -335,5 +335,5 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 16.26165, y: 11.907165}
+  m_Size: {x: 13.193338, y: 12.453859}
   m_EdgeRadius: 0

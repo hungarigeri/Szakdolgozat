@@ -32,4 +32,5 @@ public enum ActionType
     Mine,
     Craft,
     Storage,
+    Carrying,
 }

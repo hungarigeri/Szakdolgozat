@@ -124,9 +124,10 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    public void SpawnItemInWorld(Item item)
+    public void SpawnItemInWorld(Item item, Vector3? customPos = null)
     {
-        Vector3 spawnPosition = playerTransform.position + new Vector3(1, 0, 0);
+        Vector3 spawnPosition = customPos ?? (playerTransform.position + new Vector3(1, 0, 0));
+
         GameObject newItemGO = Instantiate(droppedItemPrefab, spawnPosition, Quaternion.identity);
         PickableItem pickable = newItemGO.GetComponent<PickableItem>();
 
@@ -134,8 +135,15 @@ public class InventoryManager : MonoBehaviour
         {
             pickable.item = item;
         }
-    }
 
+        // --- ÚJ RÉSZ: Az Order in Layer beállítása ---
+        SpriteRenderer sr = newItemGO.GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            // 5-ös érték: biztosan a szalag (3) és a szalagon lévő érc (4) felett lesz
+            sr.sortingOrder = 5;
+        }
+    }
     void ChangeSelectedSlot(int newSlot)
     {
         if (selectedSlot >= 0)
