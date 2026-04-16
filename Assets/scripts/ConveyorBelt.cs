@@ -2,15 +2,20 @@ using UnityEngine;
 
 public class ConveyorBelt : MonoBehaviour
 {
+    [Header("Grafikák")]
+    public Sprite straightSprite; // Az egyenes szalag képe
+    public Sprite cornerSprite;   // A kanyarodó szalag képe
+    private SpriteRenderer sr;
+
     [Header("Beállítások")]
     public float speed = 1f;
-
     [Header("Állapot")]
     public Item currentItem;
     private float progress = 0f;
 
     private SpriteRenderer itemVisual;
     private Vector2 direction;
+    private Vector3 incomingLocalPos = new Vector3(0, 5f, 0);
 
     void Start()
     {
@@ -23,19 +28,26 @@ public class ConveyorBelt : MonoBehaviour
         itemVisual.transform.localPosition = Vector3.zero;
         itemVisual.transform.localScale = new Vector3(10f, 10f, 1f);
         visualObj.SetActive(false);
+
+        UpdateShape();
     }
 
     void Update()
     {
         if (currentItem != null)
         {
-            // Haladás számítása
             progress += Time.deltaTime * speed;
 
-            // JAVÍTÁS: Kicsit túllógatjuk a határokon, hogy ne legyen hézag
-            // Fentről (0.5) indul és lemegy egészen a széléig (-0.5)
-            float yPos = Mathf.Lerp(5f, -5f, progress);
-            itemVisual.transform.localPosition = new Vector3(0, yPos, 0);
+            // --- BÉZIER-GÖRBE MATEMATIKA ---
+            Vector3 p0 = incomingLocalPos;          // 1. Honnan jön (A belépési pont)
+            Vector3 p1 = Vector3.zero;              // 2. A csempe közepe (Ezen törik meg az ív)
+            Vector3 p2 = new Vector3(0, -5f, 0);  // 3. Hova megy (Mindig lefelé hagyja el a szalagot)
+
+            // Kiszámoljuk az ívet a 3 pont között:
+            Vector3 m1 = Vector3.Lerp(p0, p1, progress);
+            Vector3 m2 = Vector3.Lerp(p1, p2, progress);
+            itemVisual.transform.localPosition = Vector3.Lerp(m1, m2, progress);
+            // --------------------------------
 
             if (progress >= 1f)
             {
@@ -44,6 +56,60 @@ public class ConveyorBelt : MonoBehaviour
         }
     }
 
+    // Ezt a függvényt akkor hívjuk meg, amikor leraksz egy szalagot a FarmingSystem-ben
+    public void UpdateShape()
+    {
+        if (sr == null) sr = GetComponent<SpriteRenderer>();
+
+        bool hasInputFromBehind = false;
+        Vector2 sideInputDirection = Vector2.zero;
+        Vector2[] directions = { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
+
+        foreach (Vector2 dir in directions)
+        {
+            Vector2 checkPos = (Vector2)transform.position + dir;
+            Collider2D hit = Physics2D.OverlapPoint(checkPos);
+
+            if (hit != null)
+            {
+                ConveyorBelt neighborBelt = hit.GetComponent<ConveyorBelt>();
+                if (neighborBelt != null && neighborBelt.direction == -dir)
+                {
+                    if (neighborBelt.direction == this.direction) hasInputFromBehind = true;
+                    else sideInputDirection = neighborBelt.direction;
+                }
+            }
+        }
+
+        if (hasInputFromBehind)
+        {
+            sr.sprite = straightSprite;
+            sr.flipX = false;
+            incomingLocalPos = new Vector3(0, 5f, 0); // Egyenes (Fentről jön)
+        }
+        else if (sideInputDirection != Vector2.zero)
+        {
+            sr.sprite = cornerSprite;
+            float cross = (sideInputDirection.x * this.direction.y) - (sideInputDirection.y * this.direction.x);
+
+            if (cross > 0)
+            {
+                sr.flipX = false;
+                incomingLocalPos = new Vector3(5f, 0, 0); // Jobbról jön be a kanyarba
+            }
+            else
+            {
+                sr.flipX = true;
+                incomingLocalPos = new Vector3(-5f, 0, 0); // Balról jön be a kanyarba
+            }
+        }
+        else
+        {
+            sr.sprite = straightSprite;
+            sr.flipX = false;
+            incomingLocalPos = new Vector3(0, 5f, 0); // Alap (Egyenes)
+        }
+    }
     public bool AcceptItem(Item item)
     {
         if (currentItem == null)

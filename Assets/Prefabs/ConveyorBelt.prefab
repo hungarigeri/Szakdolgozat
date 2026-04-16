@@ -130,7 +130,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.478, y: 3.274}
+    oldSize: {x: 7.39, y: 16.37}
     newSize: {x: 7.39, y: 16.37}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -150,5 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 046b072c9730e044fbe3ab6963b75207, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConveyorBelt
+  straightSprite: {fileID: 46691617102417507, guid: 971636f8d7639b14ead2448edb0b7ced, type: 3}
+  cornerSprite: {fileID: -521183451838841184, guid: c97b6bf023e9ff54a87d7aef74854d13, type: 3}
   speed: 1
   currentItem: {fileID: 0}
