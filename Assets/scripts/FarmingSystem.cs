@@ -4,7 +4,7 @@ public class FarmingSystem : MonoBehaviour
 {
     [Header("UI Elements")]
     public GameObject highlightSquare;
-    public GameObject directionArrow; // Ezt használjuk a mutatónak!
+    public GameObject directionArrow;
 
     [Header("Item References")]
     public Item ironOreItem;
@@ -15,6 +15,10 @@ public class FarmingSystem : MonoBehaviour
     public GameObject automataDrillPrefab;
     public GameObject barrelPrefab;
     public GameObject conveyorPrefab;
+
+    // --- JAVÍTÁS: Ketté választottuk a két kemence prefabot! ---
+    public GameObject basicFurnacePrefab;
+    public GameObject automataFurnacePrefab;
 
     private float currentPlacementRotation = 0f;
     private Vector2 lastFacingDirection = Vector2.down;
@@ -55,7 +59,7 @@ public class FarmingSystem : MonoBehaviour
         Item selectedItem = InventoryManager.instance.GetSelectedItem(false);
         bool isBuildingHeld = false;
 
-        if (selectedItem != null && (selectedItem.name == "CraftingTable" || selectedItem.name == "Furnace" || selectedItem.name == "MiningDrill" || selectedItem.name == "AutomataDrill" || selectedItem.name == "Barrel" || selectedItem.name == "ConveyorBelt"))
+        if (selectedItem != null && (selectedItem.name == "CraftingTable" || selectedItem.name == "Furnace" || selectedItem.name == "AutomataFurnace" || selectedItem.name == "Automata Furnace" || selectedItem.name == "MiningDrill" || selectedItem.name == "AutomataDrill" || selectedItem.name == "Barrel" || selectedItem.name == "ConveyorBelt"))
         {
             isBuildingHeld = true;
         }
@@ -64,7 +68,7 @@ public class FarmingSystem : MonoBehaviour
         bool isMineableOre = GameManager.Instance.tileManager.IsIronOre(targetPosition);
         bool isChoppableTree = GameManager.Instance.tileManager.IsTree(targetPosition);
         bool isWorkbench = GameManager.Instance.tileManager.IsWorkbench(targetPosition);
-        bool isFurnace = GameManager.Instance.tileManager.IsFurnace(targetPosition);
+        bool isFurnaceTile = GameManager.Instance.tileManager.IsFurnace(targetPosition);
         bool hasPrefab = HasPrefabBuilding(targetPosition);
 
         // --- HIGHLIGHT ÉS JELZÉS ---
@@ -72,14 +76,12 @@ public class FarmingSystem : MonoBehaviour
         {
             highlightSquare.transform.position = targetPosition + new Vector3(0.5f, 0.5f, 0f);
 
-            // JAVÍTVA: DINAMIKUS NYÍL FORGATÁS!
             if (selectedItem != null && selectedItem.name == "ConveyorBelt")
             {
                 highlightSquare.transform.rotation = Quaternion.Euler(0, 0, currentPlacementRotation);
                 if (directionArrow != null)
                 {
                     directionArrow.SetActive(true);
-                    // A Szalag alapból LEFELÉ (-Y) megy, a nyilat ehhez igazítjuk (180 fok)
                     directionArrow.transform.localRotation = Quaternion.Euler(0, 0, 180f);
                 }
             }
@@ -89,17 +91,32 @@ public class FarmingSystem : MonoBehaviour
                 if (directionArrow != null)
                 {
                     directionArrow.SetActive(true);
-                    // A Fúró alapból JOBBRA (+X) lő, a nyilat ehhez igazítjuk (-90 fok)
                     directionArrow.transform.localRotation = Quaternion.Euler(0, 0, -90f);
                 }
             }
+            // --- KEMENCE NYÍL (Csak az Automatának kell!) ---
+            else if (selectedItem != null && (selectedItem.name == "AutomataFurnace" || selectedItem.name == "Automata Furnace"))
+            {
+                highlightSquare.transform.rotation = Quaternion.Euler(0, 0, currentPlacementRotation);
+                if (directionArrow != null)
+                {
+                    directionArrow.SetActive(true);
+
+                    // --- MÓDOSÍTÁS: Output irány ---
+                    // Mivel az Output most már a Jobb oldalon van (transform.right),
+                    // a nyilat úgy forgatjuk, hogy jobbra mutasson (-90 fok).
+                    // (Ez pontosan megegyezik a fúró kilövési irányával!)
+                    directionArrow.transform.localRotation = Quaternion.Euler(0, 0, -90f);
+                }
+            }
+            // Minden más (pl. sima Furnace, Hordó, CraftingTable) nyíl nélkül:
             else
             {
                 highlightSquare.transform.rotation = Quaternion.identity;
                 if (directionArrow != null) directionArrow.SetActive(false);
             }
 
-            highlightSquare.SetActive(isFarmableLand || isMineableOre || isChoppableTree || isBuildingHeld || isWorkbench || isFurnace || hasPrefab);
+            highlightSquare.SetActive(isFarmableLand || isMineableOre || isChoppableTree || isBuildingHeld || isWorkbench || isFurnaceTile || hasPrefab);
 
             if (highlightSR != null)
             {
@@ -120,15 +137,21 @@ public class FarmingSystem : MonoBehaviour
             }
         }
 
-        // --- LERAKÁS LOGIKA (E GOMB) ---
+        // --- LERAKÁS ÉS INTERAKCIÓ LOGIKA (E GOMB) ---
         if (Input.GetKeyDown(KeyCode.E))
         {
             if (GameManager.Instance.tileManager.IsWorkbench(targetPosition)) { WorkbenchUI.instance.ToggleUI(); return; }
             if (GameManager.Instance.tileManager.IsFurnace(targetPosition)) { FurnaceUI.instance.ToggleUI(); return; }
 
             Collider2D hit = Physics2D.OverlapPoint(new Vector2(targetPosition.x + 0.5f, targetPosition.y + 0.5f));
-            if (hit != null && hit.GetComponent<MiningDrill>() != null) { hit.GetComponent<MiningDrill>().CollectItems(); return; }
-            if (hit != null && hit.GetComponent<StorageContainer>() != null) { StorageUI.instance.OpenStorage(hit.GetComponent<StorageContainer>()); return; }
+            if (hit != null)
+            {
+                if (hit.GetComponent<MiningDrill>() != null) { hit.GetComponent<MiningDrill>().CollectItems(); return; }
+                if (hit.GetComponent<StorageContainer>() != null) { StorageUI.instance.OpenStorage(hit.GetComponent<StorageContainer>()); return; }
+
+                Furnace hitFurnace = hit.GetComponent<Furnace>();
+                if (hitFurnace != null) { FurnaceUI.instance.OpenUIForFurnace(hitFurnace); return; }
+            }
 
             if (isBuildingHeld)
             {
@@ -160,6 +183,17 @@ public class FarmingSystem : MonoBehaviour
                         Instantiate(barrelPrefab, new Vector3(targetPosition.x + 0.5f, targetPosition.y + 0.5f, 0), Quaternion.identity);
                         InventoryManager.instance.GetSelectedItem(true);
                     }
+                    // --- JAVÍTÁS: Ketté választott kemence lerakás! ---
+                    else if (selectedItem.name == "Furnace")
+                    {
+                        Instantiate(basicFurnacePrefab, new Vector3(targetPosition.x + 0.5f, targetPosition.y + 0.5f, 0), Quaternion.Euler(0, 0, currentPlacementRotation));
+                        InventoryManager.instance.GetSelectedItem(true);
+                    }
+                    else if (selectedItem.name == "AutomataFurnace" || selectedItem.name == "Automata Furnace")
+                    {
+                        Instantiate(automataFurnacePrefab, new Vector3(targetPosition.x + 0.5f, targetPosition.y + 0.5f, 0), Quaternion.Euler(0, 0, currentPlacementRotation));
+                        InventoryManager.instance.GetSelectedItem(true);
+                    }
                     else
                     {
                         GameManager.Instance.tileManager.PlaceBuilding(targetPosition, selectedItem.name);
@@ -178,7 +212,7 @@ public class FarmingSystem : MonoBehaviour
         Collider2D hit = Physics2D.OverlapPoint(new Vector2(position.x + 0.5f, position.y + 0.5f));
         if (hit != null)
         {
-            if (hit.GetComponent<MiningDrill>() != null || hit.GetComponent<StorageContainer>() != null || hit.GetComponent<ConveyorBelt>() != null) return true;
+            if (hit.GetComponent<MiningDrill>() != null || hit.GetComponent<StorageContainer>() != null || hit.GetComponent<ConveyorBelt>() != null || hit.GetComponent<Furnace>() != null) return true;
         }
         return false;
     }

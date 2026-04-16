@@ -17,7 +17,7 @@ public class ConveyorBelt : MonoBehaviour
     private Vector2 direction;
     private Vector3 incomingLocalPos = new Vector3(0, 5f, 0);
 
-    void Start()
+    void Awake()
     {
         direction = -transform.up; // A grafikád alapján lefelé megy a szalag
 
@@ -56,7 +56,6 @@ public class ConveyorBelt : MonoBehaviour
         }
     }
 
-    // Ezt a függvényt akkor hívjuk meg, amikor leraksz egy szalagot a FarmingSystem-ben
     public void UpdateShape()
     {
         if (sr == null) sr = GetComponent<SpriteRenderer>();
@@ -110,6 +109,7 @@ public class ConveyorBelt : MonoBehaviour
             incomingLocalPos = new Vector3(0, 5f, 0); // Alap (Egyenes)
         }
     }
+
     public bool AcceptItem(Item item)
     {
         if (currentItem == null)
@@ -125,41 +125,56 @@ public class ConveyorBelt : MonoBehaviour
 
     void TryPassItem()
     {
-        Vector2 targetPos = (Vector2)transform.position + direction;
-        Collider2D[] hits = Physics2D.OverlapCircleAll(targetPos, 0.2f);
-        bool successfullyPassed = false;
+        Vector2 targetPos = (Vector2)transform.position + direction; //
+        Collider2D[] hits = Physics2D.OverlapCircleAll(targetPos, 0.2f); //
+        bool successfullyPassed = false; //
 
-        foreach (Collider2D hit in hits)
+        foreach (Collider2D hit in hits) //
         {
-            ConveyorBelt nextBelt = hit.GetComponent<ConveyorBelt>();
-            if (nextBelt != null)
+            // 1. Ellenőrzés: Következő futószalag
+            ConveyorBelt nextBelt = hit.GetComponent<ConveyorBelt>(); //
+            if (nextBelt != null) //
             {
-                if (nextBelt.AcceptItem(currentItem))
+                if (nextBelt.AcceptItem(currentItem)) //
+                {
+                    successfullyPassed = true; //
+                    ClearBelt(); //
+                    return; //
+                }
+            }
+
+            // 2. Ellenőrzés: Hordó / Raktár
+            StorageContainer storage = hit.GetComponent<StorageContainer>(); //
+            if (storage != null) //
+            {
+                storage.DepositItem(currentItem, 1); //
+                successfullyPassed = true; //
+                ClearBelt(); //
+                return; //
+            }
+
+            // --- ÚJ: 3. Ellenőrzés: KEMENCE ---
+            Furnace furnace = hit.GetComponent<Furnace>();
+            if (furnace != null)
+            {
+                // JAVÍTÁS: Átadjuk a szalag saját pozícióját is (transform.position) az irányellenőrzéshez!
+                if (furnace.AcceptItem(currentItem, transform.position))
                 {
                     successfullyPassed = true;
                     ClearBelt();
                     return;
                 }
             }
-
-            StorageContainer storage = hit.GetComponent<StorageContainer>();
-            if (storage != null)
-            {
-                storage.DepositItem(currentItem, 1);
-                successfullyPassed = true;
-                ClearBelt();
-                return;
-            }
         }
 
-        // --- ÚJ: HA A SZALAG VÉGÉN NINCS SEMMI, LEESIK A FÖLDRE ---
+        // --- HA A SZALAG VÉGÉN NINCS SEMMI (vagy a kemence visszautasította, mert oldalról jött) ---
         if (!successfullyPassed)
         {
-            InventoryManager.instance.SpawnItemInWorld(currentItem, new Vector3(targetPos.x, targetPos.y, 0));
-            ClearBelt();
+            // Leesik a földre (ezt a részt már korábban megírtuk)
+            InventoryManager.instance.SpawnItemInWorld(currentItem, new Vector3(targetPos.x, targetPos.y, 0)); //
+            ClearBelt(); //
         }
     }
-
     void ClearBelt()
     {
         currentItem = null;

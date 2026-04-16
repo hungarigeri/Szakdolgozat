@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6ec123721fb4bd0498d6fa060b716efb, type: 3}
-  m_Name: MiningDrill
+  m_Name: AutomataFurnace
   m_EditorClassIdentifier: Assembly-CSharp::Item
   tile: {fileID: 0}
   type: 0
-  actionType: 1
+  actionType: 0
   range: {x: 5, y: 4}
   stackable: 0
-  image: {fileID: 7315958836550786593, guid: 09839fcb19e4d894795b6cf825e1936f, type: 3}
+  image: {fileID: 7592182142214484343, guid: 804ccfdcf561e4d488937d11ea26ff6a, type: 3}
