@@ -6544,12 +6544,15 @@ MonoBehaviour:
   directionArrow: {fileID: 31058153}
   ironOreItem: {fileID: 11400000, guid: d5d3c228a9004e34892d11adebba1722, type: 2}
   woodItem: {fileID: 11400000, guid: 3fec4e771ffb73c4da900ade25c38461, type: 2}
+  seedItem: {fileID: 11400000, guid: e47350b1bbb04b8429b60ea501584630, type: 2}
+  shovelItem: {fileID: 11400000, guid: e324f670af1d15147a36b7de1fa0ce9a, type: 2}
   miningDrillPrefab: {fileID: 5510672690155361342, guid: 658afd75e36fe6843adb4beef14febda, type: 3}
   automataDrillPrefab: {fileID: 5510672690155361342, guid: 69747b132b9c8ec4aa2fe7c1c54f4e60, type: 3}
   barrelPrefab: {fileID: 1616262877766338149, guid: d7e16531c378da040b5f27aa3791241d, type: 3}
   conveyorPrefab: {fileID: 4197961949014082113, guid: 7dc4e853044333f4eab2a5109fbd1d82, type: 3}
   basicFurnacePrefab: {fileID: 5647597396014975840, guid: b33d935e698d7ae4f800267490f79d0c, type: 3}
   automataFurnacePrefab: {fileID: 5647597396014975840, guid: 495da1f26fc1ce74f9b2d935e30270b2, type: 3}
+  cropPrefab: {fileID: 2181754610362642754, guid: 639b1444863b5ac438878b5911d13dea, type: 3}
 --- !u!114 &1210680507
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7154,6 +7157,8 @@ MonoBehaviour:
   InterectedTile: {fileID: 11400000, guid: 1ad3dc4081e69904faa6df3455beaf2c, type: 2}
   munkaasztalTile: {fileID: 11400000, guid: 1b6644bd911fc3546bdf5fc7bbdc48da, type: 2}
   furnaceTile: {fileID: 11400000, guid: 30c67f33acc0cd341a441cdfad8b3b93, type: 2}
+  tilledTile: {fileID: 11400000, guid: 1ad3dc4081e69904faa6df3455beaf2c, type: 2}
+  grassMap: {fileID: 1777466031}
 --- !u!114 &1279436274
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10536,6 +10541,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ce259b132769cfc49a5cd14821b250cf, type: 2}
   - {fileID: 11400000, guid: e1a3aeb97675691499eb7a0e7584ff4d, type: 2}
   - {fileID: 11400000, guid: 9691b30955ed771488c3941dfe3f8b06, type: 2}
+  - {fileID: 11400000, guid: e324f670af1d15147a36b7de1fa0ce9a, type: 2}
+  - {fileID: 11400000, guid: e47350b1bbb04b8429b60ea501584630, type: 2}
   droppedItemPrefab: {fileID: 1752204360746025206, guid: 0d1fa3c0025669d43a375bfa71605a30, type: 3}
   playerTransform: {fileID: 1210680504}
   hoveredItem: {fileID: 0}

@@ -14,6 +14,8 @@ public class TileManager : MonoBehaviour
     public Tile InterectedTile;
     public Tile munkaasztalTile; // ÚJ: A munkaasztal csempéje
     public Tile furnaceTile;
+    public TileBase tilledTile;
+    public Tilemap grassMap;
 
     void Start()
     {
@@ -29,11 +31,9 @@ public class TileManager : MonoBehaviour
 
     public bool IsInteractable(Vector3Int position)
     {
-        TileBase tileAtPosition = interactableMap.GetTile(position);
-        if (tileAtPosition != null && tileAtPosition.name == "Interactable_Hidden") return true;
-        return false;
+        // Ha van BÁRMILYEN csempe a "fű" rétegen ezen a koordinátán, akkor igaz (lehet ásni)!
+        return grassMap.HasTile(position);
     }
-
     public void SetInteracted(Vector3Int position)
     {
         interactableMap.SetTile(position, InterectedTile);
@@ -107,6 +107,28 @@ public class TileManager : MonoBehaviour
         TileBase tile = buildingMap.GetTile(position);
         // Ide írd a kemence tile pontos nevét (pl. furnace_0)
         return tile != null && (tile.name == "furnice_0" || tile.name == "Furnice_0");
+    }
+
+    // Ez a TileManager-ben legyen
+    public void TillGround(Vector3Int position)
+    {
+        if (IsInteractable(position))
+        {
+            // A fű csempét egyenesen kicseréljük a megművelt barna sárra
+            grassMap.SetTile(position, tilledTile);
+        }
+    }
+    // Ezt keresi a FarmingSystem, hogy tudja, vethet-e magot!
+    public bool IsTilled(Vector3Int position)
+    {
+        TileBase tile = grassMap.GetTile(position);
+
+        // Ha a fű rétegen lévő csempe megegyezik a sár csempével
+        if (tile == tilledTile)
+        {
+            return true;
+        }
+        return false;
     }
 }
 

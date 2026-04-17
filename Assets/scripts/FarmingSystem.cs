@@ -9,16 +9,19 @@ public class FarmingSystem : MonoBehaviour
     [Header("Item References")]
     public Item ironOreItem;
     public Item woodItem;
+    // --- ÚJ: Mezőgazdasági tárgyak ---
+    public Item seedItem;   // A Mag tárgy (ScriptableObject)
+    public Item shovelItem; // Az Ásó tárgy (ScriptableObject)
 
     [Header("Prefabok")]
     public GameObject miningDrillPrefab;
     public GameObject automataDrillPrefab;
     public GameObject barrelPrefab;
     public GameObject conveyorPrefab;
-
-    // --- JAVÍTÁS: Ketté választottuk a két kemence prefabot! ---
     public GameObject basicFurnacePrefab;
     public GameObject automataFurnacePrefab;
+    // --- ÚJ: Növény Prefab ---
+    public GameObject cropPrefab;
 
     private float currentPlacementRotation = 0f;
     private Vector2 lastFacingDirection = Vector2.down;
@@ -33,7 +36,7 @@ public class FarmingSystem : MonoBehaviour
     {
         if (InventoryManager.instance == null || GameManager.Instance == null || GameManager.Instance.tileManager == null) return;
 
-        // --- FORGATÁS ---
+        // --- FORGATÁS (R GOMB) ---
         if (Input.GetKeyDown(KeyCode.R))
         {
             currentPlacementRotation -= 90f;
@@ -59,12 +62,14 @@ public class FarmingSystem : MonoBehaviour
         Item selectedItem = InventoryManager.instance.GetSelectedItem(false);
         bool isBuildingHeld = false;
 
-        if (selectedItem != null && (selectedItem.name == "CraftingTable" || selectedItem.name == "Furnace" || selectedItem.name == "AutomataFurnace" || selectedItem.name == "Automata Furnace" || selectedItem.name == "MiningDrill" || selectedItem.name == "AutomataDrill" || selectedItem.name == "Barrel" || selectedItem.name == "ConveyorBelt"))
+        // Épületek és a Mag/Ásó ellenőrzése
+        if (selectedItem != null && (selectedItem.name == "CraftingTable" || selectedItem.name == "Furnace" || selectedItem.name == "AutomataFurnace" || selectedItem.name == "Automata Furnace" || selectedItem.name == "MiningDrill" || selectedItem.name == "AutomataDrill" || selectedItem.name == "Barrel" || selectedItem.name == "ConveyorBelt" || selectedItem == seedItem || selectedItem == shovelItem))
         {
             isBuildingHeld = true;
         }
 
-        bool isFarmableLand = GameManager.Instance.tileManager.IsInteractable(targetPosition);
+        bool isFarmableLand = GameManager.Instance.tileManager.IsInteractable(targetPosition); // A sima fű
+        bool isTilledLand = GameManager.Instance.tileManager.IsTilled(targetPosition); // A megművelt föld
         bool isMineableOre = GameManager.Instance.tileManager.IsIronOre(targetPosition);
         bool isChoppableTree = GameManager.Instance.tileManager.IsTree(targetPosition);
         bool isWorkbench = GameManager.Instance.tileManager.IsWorkbench(targetPosition);
@@ -76,47 +81,30 @@ public class FarmingSystem : MonoBehaviour
         {
             highlightSquare.transform.position = targetPosition + new Vector3(0.5f, 0.5f, 0f);
 
+            // Nyíl forgatása az Automata gépekhez
             if (selectedItem != null && selectedItem.name == "ConveyorBelt")
             {
                 highlightSquare.transform.rotation = Quaternion.Euler(0, 0, currentPlacementRotation);
-                if (directionArrow != null)
-                {
-                    directionArrow.SetActive(true);
-                    directionArrow.transform.localRotation = Quaternion.Euler(0, 0, 180f);
-                }
+                if (directionArrow != null) { directionArrow.SetActive(true); directionArrow.transform.localRotation = Quaternion.Euler(0, 0, 180f); }
             }
             else if (selectedItem != null && selectedItem.name == "AutomataDrill")
             {
                 highlightSquare.transform.rotation = Quaternion.Euler(0, 0, currentPlacementRotation);
-                if (directionArrow != null)
-                {
-                    directionArrow.SetActive(true);
-                    directionArrow.transform.localRotation = Quaternion.Euler(0, 0, -90f);
-                }
+                if (directionArrow != null) { directionArrow.SetActive(true); directionArrow.transform.localRotation = Quaternion.Euler(0, 0, -90f); }
             }
-            // --- KEMENCE NYÍL (Csak az Automatának kell!) ---
             else if (selectedItem != null && (selectedItem.name == "AutomataFurnace" || selectedItem.name == "Automata Furnace"))
             {
                 highlightSquare.transform.rotation = Quaternion.Euler(0, 0, currentPlacementRotation);
-                if (directionArrow != null)
-                {
-                    directionArrow.SetActive(true);
-
-                    // --- MÓDOSÍTÁS: Output irány ---
-                    // Mivel az Output most már a Jobb oldalon van (transform.right),
-                    // a nyilat úgy forgatjuk, hogy jobbra mutasson (-90 fok).
-                    // (Ez pontosan megegyezik a fúró kilövési irányával!)
-                    directionArrow.transform.localRotation = Quaternion.Euler(0, 0, -90f);
-                }
+                if (directionArrow != null) { directionArrow.SetActive(true); directionArrow.transform.localRotation = Quaternion.Euler(0, 0, -90f); }
             }
-            // Minden más (pl. sima Furnace, Hordó, CraftingTable) nyíl nélkül:
             else
             {
                 highlightSquare.transform.rotation = Quaternion.identity;
                 if (directionArrow != null) directionArrow.SetActive(false);
             }
 
-            highlightSquare.SetActive(isFarmableLand || isMineableOre || isChoppableTree || isBuildingHeld || isWorkbench || isFurnaceTile || hasPrefab);
+            // Láthatóság beállítása
+            highlightSquare.SetActive(isFarmableLand || isTilledLand || isMineableOre || isChoppableTree || isBuildingHeld || isWorkbench || isFurnaceTile || hasPrefab);
 
             if (highlightSR != null)
             {
@@ -125,7 +113,11 @@ public class FarmingSystem : MonoBehaviour
                     bool canPlace = false;
                     if (selectedItem != null && (selectedItem.name == "MiningDrill" || selectedItem.name == "AutomataDrill"))
                         canPlace = isMineableOre && !hasPrefab;
-                    else
+                    else if (selectedItem == shovelItem || selectedItem.name == "Shovel") // Ásó logikája (csak fűre)
+                        canPlace = isFarmableLand && !hasPrefab;
+                    else if (selectedItem == seedItem) // Mag logikája (csak megművelt földre)
+                        canPlace = isTilledLand && !hasPrefab;
+                    else // Többi épület
                         canPlace = GameManager.Instance.tileManager.CanPlaceBuilding(targetPosition) && !hasPrefab && !isChoppableTree && !isMineableOre;
 
                     highlightSR.color = canPlace ? new Color(0f, 1f, 0f, 0.6f) : new Color(1f, 0f, 0f, 0.6f);
@@ -140,9 +132,11 @@ public class FarmingSystem : MonoBehaviour
         // --- LERAKÁS ÉS INTERAKCIÓ LOGIKA (E GOMB) ---
         if (Input.GetKeyDown(KeyCode.E))
         {
+            // UI Ablakok (Csempékhez)
             if (GameManager.Instance.tileManager.IsWorkbench(targetPosition)) { WorkbenchUI.instance.ToggleUI(); return; }
             if (GameManager.Instance.tileManager.IsFurnace(targetPosition)) { FurnaceUI.instance.ToggleUI(); return; }
 
+            // PREFAB INTERAKCIÓK KIVÁLASZTÁSA
             Collider2D hit = Physics2D.OverlapPoint(new Vector2(targetPosition.x + 0.5f, targetPosition.y + 0.5f));
             if (hit != null)
             {
@@ -151,11 +145,40 @@ public class FarmingSystem : MonoBehaviour
 
                 Furnace hitFurnace = hit.GetComponent<Furnace>();
                 if (hitFurnace != null) { FurnaceUI.instance.OpenUIForFurnace(hitFurnace); return; }
+
+                // --- ARATÁS ---
+                CropGrowth crop = hit.GetComponent<CropGrowth>();
+                if (crop != null && crop.isGrown)
+                {
+                    crop.Harvest();
+                    return;
+                }
             }
 
+            // LERAKÁS / HASZNÁLAT
             if (isBuildingHeld)
             {
-                if (selectedItem.name == "MiningDrill")
+                // --- ÁSÁS (Fű megművelése) ---
+                if (selectedItem == shovelItem || selectedItem.name == "Shovel")
+                {
+                    if (isFarmableLand && !hasPrefab)
+                    {
+                        GameManager.Instance.tileManager.TillGround(targetPosition);
+                        return; // Opcionálisan ide jöhet InventoryManager.instance.GetSelectedItem(true) ha elhasználódik az ásó
+                    }
+                }
+                // --- VETÉS (Mag elültetése) ---
+                else if (selectedItem == seedItem)
+                {
+                    if (isTilledLand && !hasPrefab)
+                    {
+                        Instantiate(cropPrefab, new Vector3(targetPosition.x + 0.5f, targetPosition.y + 0.5f, 0), Quaternion.identity);
+                        InventoryManager.instance.GetSelectedItem(true); // Elveszünk 1 magot
+                        return;
+                    }
+                }
+                // --- GÉPEK ---
+                else if (selectedItem.name == "MiningDrill")
                 {
                     if (isMineableOre && !hasPrefab)
                     {
@@ -183,7 +206,6 @@ public class FarmingSystem : MonoBehaviour
                         Instantiate(barrelPrefab, new Vector3(targetPosition.x + 0.5f, targetPosition.y + 0.5f, 0), Quaternion.identity);
                         InventoryManager.instance.GetSelectedItem(true);
                     }
-                    // --- JAVÍTÁS: Ketté választott kemence lerakás! ---
                     else if (selectedItem.name == "Furnace")
                     {
                         Instantiate(basicFurnacePrefab, new Vector3(targetPosition.x + 0.5f, targetPosition.y + 0.5f, 0), Quaternion.Euler(0, 0, currentPlacementRotation));
@@ -201,6 +223,7 @@ public class FarmingSystem : MonoBehaviour
                     }
                 }
             }
+            // ALAPVETŐ INTERAKCIÓK (Gyűjtögetés)
             else if (isMineableOre) { if (selectedItem != null && selectedItem.name == "Pickaxe") InventoryManager.instance.Additem(ironOreItem); }
             else if (isChoppableTree) { if (selectedItem != null && selectedItem.name == "Axe") InventoryManager.instance.Additem(woodItem); }
             else if (isFarmableLand) { GameManager.Instance.tileManager.SetInteracted(targetPosition); }
@@ -212,7 +235,8 @@ public class FarmingSystem : MonoBehaviour
         Collider2D hit = Physics2D.OverlapPoint(new Vector2(position.x + 0.5f, position.y + 0.5f));
         if (hit != null)
         {
-            if (hit.GetComponent<MiningDrill>() != null || hit.GetComponent<StorageContainer>() != null || hit.GetComponent<ConveyorBelt>() != null || hit.GetComponent<Furnace>() != null) return true;
+            // Bővítve a CropGrowth-al, hogy ne építsünk a növényekre!
+            if (hit.GetComponent<MiningDrill>() != null || hit.GetComponent<StorageContainer>() != null || hit.GetComponent<ConveyorBelt>() != null || hit.GetComponent<Furnace>() != null || hit.GetComponent<CropGrowth>() != null) return true;
         }
         return false;
     }

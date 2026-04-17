@@ -2,11 +2,16 @@ using UnityEngine;
 
 public class CropGrowth : MonoBehaviour
 {
-    public Sprite grownSprite; // Inspector-ban húzd ide a felnőtt növény sprite-ot
+    [Header("Grafika")]
+    public Sprite grownSprite; 
     private SpriteRenderer sr;
-    private bool isGrown = false;
-    
-    private bool playerInRange = false;
+
+    [Header("Aratás Beállításai")]
+    public Item harvestedItem; // Mit ad a növény? (Pl. Búza Item)
+    public int yieldAmount = 1; // Mennyit adjon?
+
+    // Public lett, hogy a FarmingSystem is lássa, megnőtt-e már!
+    public bool isGrown = false; 
 
     void Start()
     {
@@ -17,32 +22,24 @@ public class CropGrowth : MonoBehaviour
     System.Collections.IEnumerator Grow()
     {
         yield return new WaitForSeconds(5f); // 5 másodperc növekedés
-        sr.sprite = grownSprite; // Sprite váltás
+        sr.sprite = grownSprite; 
         isGrown = true;
     }
 
-   void Update()
+    // Ezt a függvényt a FarmingSystem hívja meg az 'E' gombbal!
+    public void Harvest()
     {
-        // csak akkor reagáljon az F-re, ha a játékos közel van
-        if (playerInRange && isGrown && Input.GetKeyDown(KeyCode.F))
+        if (isGrown)
         {
+            // Odaadja a játékosnak a kész terményt
+            if (harvestedItem != null)
+            {
+                InventoryManager.instance.Additem(harvestedItem);
+                // Ha többet akarsz adni: (Ide írhatsz egy for ciklust, ha yieldAmount > 1)
+            }
+
+            // Eltűnik a növény a földről
             Destroy(gameObject);
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerInRange = true;
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerInRange = false;
         }
     }
 }
