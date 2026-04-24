@@ -170,8 +170,8 @@ public class ConveyorBelt : MonoBehaviour
             DeliveryRocket rocket = hit.GetComponent<DeliveryRocket>();
             if (rocket != null)
             {
-                // Ha a rakétának kell az item (mert a fázis része), akkor elnyeli!
-                if (rocket.AcceptItem(currentItem))
+                // ÚJ: Átadjuk a szalag pozícióját is (transform.position)
+                if (rocket.AcceptItem(currentItem, transform.position))
                 {
                     successfullyPassed = true;
                     ClearBelt();

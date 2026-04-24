@@ -21,11 +21,26 @@ public class DeliveryRocket : MonoBehaviour
     [Header("Progresszió")]
     public RocketPhase[] phases; // Az összes fázis listája (Inspectorban állíthatod be!)
     public int currentPhaseIndex = 0;
+    [Header("Bemenet Beállításai")]
+    // ÚJ: Ezt tudod állítani a Unity-ben! Kisebb épületnél 1, nagynál 2 vagy 3.
+    public float inputDistance = 2f;
 
     // Ezt hívja meg a Futószalag (ConveyorBelt.cs), amikor beletol valamit
-    public bool AcceptItem(Item item)
+    // --- ÚJ: Elkérjük a szalag pozícióját is (sourcePosition) ---
+    public bool AcceptItem(Item item, Vector3 sourcePosition)
     {
         if (currentPhaseIndex >= phases.Length) return false;
+
+        // --- MÓDOSÍTOTT IRÁNYELLENŐRZÉS ---
+        // Most már figyelembe veszi az inputDistance-t (milyen messze van a széle)
+        Vector3 expectedInputPos = transform.position - (transform.right * inputDistance);
+
+        // Növeltük a "tűréshatárt" 0.1f-ről 0.5f-re, hogy biztosan elkapja a szalagot a rácson!
+        if (Vector2.Distance(sourcePosition, expectedInputPos) > 0.5f)
+        {
+            return false;
+        }
+
         RocketPhase currentPhase = phases[currentPhaseIndex];
 
         foreach (RocketRequirement req in currentPhase.requirements)
@@ -35,7 +50,6 @@ public class DeliveryRocket : MonoBehaviour
                 req.currentAmount++;
                 CheckPhaseComplete();
 
-                // --- ÚJ: FRISSÍTJÜK A UI-T, MERT KAPTUNK VALAMIT! ---
                 if (RocketUI.instance != null && RocketUI.instance.rocketPanel.activeSelf)
                 {
                     RocketUI.instance.UpdateDisplay();
@@ -46,7 +60,6 @@ public class DeliveryRocket : MonoBehaviour
         }
         return false;
     }
-
     void CheckPhaseComplete()
     {
         RocketPhase currentPhase = phases[currentPhaseIndex];

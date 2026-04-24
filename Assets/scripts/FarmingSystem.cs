@@ -89,22 +89,24 @@ public class FarmingSystem : MonoBehaviour
                 highlightSquare.transform.rotation = Quaternion.Euler(0, 0, currentPlacementRotation);
                 if (directionArrow != null) { directionArrow.SetActive(true); directionArrow.transform.localRotation = Quaternion.Euler(0, 0, 180f); }
             }
-            else if (selectedItem != null && selectedItem.name == "AutomataDrill")
+            // ... (AutomataDrill és AutomataFurnace kódja) ...
+
+            // --- ÚJ: NYÍL A RAKÉTÁHOZ ---
+            else if (selectedItem != null && (selectedItem == rocketItem || selectedItem.name == "Rocket"))
             {
                 highlightSquare.transform.rotation = Quaternion.Euler(0, 0, currentPlacementRotation);
-                if (directionArrow != null) { directionArrow.SetActive(true); directionArrow.transform.localRotation = Quaternion.Euler(0, 0, -90f); }
-            }
-            else if (selectedItem != null && (selectedItem.name == "AutomataFurnace" || selectedItem.name == "Automata Furnace"))
-            {
-                highlightSquare.transform.rotation = Quaternion.Euler(0, 0, currentPlacementRotation);
-                if (directionArrow != null) { directionArrow.SetActive(true); directionArrow.transform.localRotation = Quaternion.Euler(0, 0, -90f); }
+                if (directionArrow != null)
+                {
+                    directionArrow.SetActive(true);
+                    // 90 fok = Balra mutat, jelezve, hogy OTT a bemenet
+                    directionArrow.transform.localRotation = Quaternion.Euler(0, 0, 90f);
+                }
             }
             else
             {
                 highlightSquare.transform.rotation = Quaternion.identity;
                 if (directionArrow != null) directionArrow.SetActive(false);
             }
-
             // Láthatóság beállítása
             highlightSquare.SetActive(isFarmableLand || isTilledLand || isMineableOre || isChoppableTree || isBuildingHeld || isWorkbench || isFurnaceTile || hasPrefab);
 
@@ -246,8 +248,11 @@ public class FarmingSystem : MonoBehaviour
         Collider2D hit = Physics2D.OverlapPoint(new Vector2(position.x + 0.5f, position.y + 0.5f));
         if (hit != null)
         {
-            // Bővítve a CropGrowth-al, hogy ne építsünk a növényekre!
-            if (hit.GetComponent<MiningDrill>() != null || hit.GetComponent<StorageContainer>() != null || hit.GetComponent<ConveyorBelt>() != null || hit.GetComponent<Furnace>() != null || hit.GetComponent<CropGrowth>() != null) return true;
+            // --- ÚJ: Hozzáadtuk a Rakétát (DeliveryRocket) is a listához! ---
+            if (hit.GetComponent<MiningDrill>() != null || hit.GetComponent<StorageContainer>() != null || hit.GetComponent<ConveyorBelt>() != null || hit.GetComponent<Furnace>() != null || hit.GetComponent<CropGrowth>() != null || hit.GetComponent<DeliveryRocket>() != null)
+            {
+                return true;
+            }
         }
         return false;
     }

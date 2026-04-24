@@ -5,10 +5,14 @@ public class StorageUI : MonoBehaviour
 {
     public static StorageUI instance;
 
-    public GameObject storagePanel; // Maga az ablak
-    public TextMeshProUGUI contentsText; // Ide írjuk ki a tartalmát (egyelőre csak szövegként)
+    public GameObject storagePanel;
+    public TextMeshProUGUI contentsText;
 
-    private StorageContainer currentStorage; // Melyik hordóba nézünk épp?
+    private StorageContainer currentStorage;
+
+    // --- ÚJ: Időzítés védő változók (mint a Kemencénél) ---
+    private int frameOpened = -1;
+    private int frameClosed = -1;
 
     void Awake()
     {
@@ -16,20 +20,50 @@ public class StorageUI : MonoBehaviour
         if (storagePanel != null) storagePanel.SetActive(false);
     }
 
+    void Update()
+    {
+        // --- ÚJ: Kilépés ESC vagy E gombbal ---
+        if (storagePanel != null && storagePanel.activeSelf)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.E))
+            {
+                // Csak akkor zárjuk be, ha nem pont ebben a képkockában nyitottuk ki
+                if (Time.frameCount != frameOpened)
+                {
+                    CloseStorage();
+                }
+            }
+        }
+    }
+
     public void OpenStorage(StorageContainer container)
     {
+        // Ha pont most zártuk be, ne nyíljon újra
+        if (Time.frameCount == frameClosed) return;
+
+        // Ha már nyitva van, és újra rányomunk, zárja be (Toggle)
+        if (storagePanel.activeSelf && currentStorage == container)
+        {
+            CloseStorage();
+            return;
+        }
+
         currentStorage = container;
         storagePanel.SetActive(true);
-        RefreshUI();
+        frameOpened = Time.frameCount; // Megjegyezzük a nyitás pillanatát
+
+        UpdateUI();
     }
 
     public void CloseStorage()
     {
-        storagePanel.SetActive(false);
+        if (storagePanel != null) storagePanel.SetActive(false);
         currentStorage = null;
+        frameClosed = Time.frameCount; // Megjegyezzük a bezárás pillanatát
     }
 
-    public void RefreshUI()
+    // --- ÁTNEVEZTÜK: RefreshUI -> UpdateUI, hogy passzoljon a StorageContainer-hez! ---
+    public void UpdateUI()
     {
         if (currentStorage == null) return;
 
@@ -47,10 +81,10 @@ public class StorageUI : MonoBehaviour
             }
         }
 
-        contentsText.text = info;
+        if (contentsText != null) contentsText.text = info;
     }
 
-    // Ezt a gombot nyomjuk meg, hogy betegyük a kezünkben lévő dolgot
+    // Beteszünk 1 db-ot a kezünkben lévő tárgyból
     public void DepositHeldItem()
     {
         if (currentStorage == null) return;
@@ -58,13 +92,27 @@ public class StorageUI : MonoBehaviour
         Item heldItem = InventoryManager.instance.GetSelectedItem(false);
         if (heldItem != null)
         {
-            // Elvesszük a játékostól (GetSelectedItem(true) fogyaszt egyet)
-            InventoryManager.instance.GetSelectedItem(true);
+            InventoryManager.instance.GetSelectedItem(true); // Elveszünk 1-et
+            currentStorage.DepositItem(heldItem, 1); // Beteszünk 1-et
+            UpdateUI();
+        }
+    }
 
-            // Betesszük a hordóba
-            currentStorage.DepositItem(heldItem, 1);
+    // --- ÚJ: Kiveszünk 1 db-ot a hordóból (A legelső tárgyból) ---
+    public void WithdrawItemButton()
+    {
+        if (currentStorage != null && currentStorage.contents.Count > 0)
+        {
+            // Mindig a lista legelső elemét próbáljuk kivenni
+            Item itemToTake = currentStorage.contents[0].item;
 
-            RefreshUI();
+            // Betesszük a táskába
+            InventoryManager.instance.Additem(itemToTake);
+
+            // Kivesszük a hordóból
+            currentStorage.WithdrawItem(itemToTake, 1);
+
+            UpdateUI();
         }
     }
 }

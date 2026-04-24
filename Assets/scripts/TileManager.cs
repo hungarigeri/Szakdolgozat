@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class TileManager : MonoBehaviour
 {
     [Header("Tilemaps")]
-    public Tilemap interactableMap; // Földművelés
+
     public Tilemap oreMap;          // Ércek (Vas)
     public Tilemap treeMap;         // ÚJ: Fák (Favágás)
     public Tilemap buildingMap;
@@ -30,14 +30,7 @@ public class TileManager : MonoBehaviour
 
     void Start()
     {
-        foreach (var position in interactableMap.cellBounds.allPositionsWithin)
-        {
-            TileBase tile = interactableMap.GetTile(position);
-            if (tile != null && tile.name == "Interactable_visible")
-            {
-                interactableMap.SetTile(position, hiddenInteractableTile);
-            }
-        }
+
     }
 
     void Update()
@@ -81,10 +74,6 @@ public class TileManager : MonoBehaviour
     {
         // Ha van BÁRMILYEN csempe a "fű" rétegen ezen a koordinátán, akkor igaz (lehet ásni)!
         return grassMap.HasTile(position);
-    }
-    public void SetInteracted(Vector3Int position)
-    {
-        interactableMap.SetTile(position, InterectedTile);
     }
 
     public bool IsIronOre(Vector3Int position)
