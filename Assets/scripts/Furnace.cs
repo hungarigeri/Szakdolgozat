@@ -31,11 +31,6 @@ public class Furnace : MonoBehaviour
             currentProgress = 0f;
         }
 
-        // --- MINECRAFT LOGIKA (Recept felejtés) ---
-        if (!isAutomated && storedInput <= 0 && storedOutput <= 0)
-        {
-            currentRecipe = null;
-        }
 
         // 2. AUTOMATA KIMENET
         if (isAutomated && storedOutput > 0)

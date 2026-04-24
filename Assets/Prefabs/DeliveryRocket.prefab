@@ -156,6 +156,9 @@ MonoBehaviour:
     - requiredItem: {fileID: 11400000, guid: d5d3c228a9004e34892d11adebba1722, type: 2}
       targetAmount: 10
       currentAmount: 0
+    - requiredItem: {fileID: 11400000, guid: e47350b1bbb04b8429b60ea501584630, type: 2}
+      targetAmount: 1
+      currentAmount: 0
   - phaseName: "2. F\xE1zis: s\xFCt\xE9s"
     requirements:
     - requiredItem: {fileID: 11400000, guid: 548420fc0948afc42a5435ba2f091162, type: 2}

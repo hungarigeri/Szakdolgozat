@@ -13,21 +13,26 @@ public class FurnaceUI : MonoBehaviour
     public Slider progressBar;
     public Image recipeIcon;
 
+    [Header("ÚJ: Hibaüzenet")]
+    public TextMeshProUGUI warningText;
+    private float warningTimer = 0f;
+
     [Header("Mód Specifikus Panelek")]
     public GameObject manualControlsPanel;
     public GameObject autoControlsPanel;
 
-    [Header("Összes Sütési Recept (Minecraft módhoz)")]
+    [Header("Összes Sütési Recept")]
     public CraftingRecipe[] allSmeltingRecipes;
 
     private Furnace activeFurnace;
     private int frameOpened = -1;
-    private int frameClosed = -1; // --- 1. ÚJ VÉDELEM: Mikor zártuk be? ---
+    private int frameClosed = -1;
 
     void Awake()
     {
         instance = this;
         if (furnacePanel != null) furnacePanel.SetActive(false);
+        if (warningText != null) warningText.gameObject.SetActive(false);
     }
 
     void Update()
@@ -45,8 +50,16 @@ public class FurnaceUI : MonoBehaviour
             }
         }
 
+        // Hibaüzenet eltüntetése
+        if (warningTimer > 0)
+        {
+            warningTimer -= Time.deltaTime;
+            if (warningTimer <= 0 && warningText != null) warningText.gameObject.SetActive(false);
+        }
+
         if (!furnacePanel.activeSelf || activeFurnace == null) return;
 
+        // UI Frissítése
         if (activeFurnace.currentRecipe != null)
         {
             progressBar.value = activeFurnace.currentProgress / activeFurnace.currentRecipe.requiredWork;
@@ -61,10 +74,8 @@ public class FurnaceUI : MonoBehaviour
 
     public void OpenUIForFurnace(Furnace furnaceObj)
     {
-        // --- 2. ÚJ VÉDELEM: Ha pont most zártuk be az 'E'-vel, ne nyissa azonnal újra! ---
         if (Time.frameCount == frameClosed) return;
 
-        // --- 3. ÚJ VÉDELEM: Ha már nyitva van ez a gép, az 'E' gomb bezárja (Toggle)! ---
         if (furnacePanel.activeSelf && activeFurnace == furnaceObj)
         {
             ToggleUI();
@@ -73,7 +84,6 @@ public class FurnaceUI : MonoBehaviour
 
         activeFurnace = furnaceObj;
         furnacePanel.SetActive(true);
-
         frameOpened = Time.frameCount;
 
         if (activeFurnace.isAutomated)
@@ -91,45 +101,49 @@ public class FurnaceUI : MonoBehaviour
         else ClearVisuals();
     }
 
-    // --- RECEPT KIVÁLASZTÁSA ---
+    // --- ÚJ: RECEPT KIVÁLASZTÁSA (Már a sima kemencénél is engedi!) ---
     public void SelectRecipe(CraftingRecipe recipe)
     {
-        if (activeFurnace != null && activeFurnace.isAutomated)
+        if (activeFurnace != null)
         {
+            // Biztonsági védelem: Ha már van benne MÁSIK anyag, ne engedjük átváltani
+            if (activeFurnace.storedInput > 0 && activeFurnace.currentRecipe != null && activeFurnace.currentRecipe != recipe)
+            {
+                ShowWarning("Előbb vedd ki a bent lévő anyagot!");
+                return;
+            }
+
             activeFurnace.currentRecipe = recipe;
             UpdateVisuals(recipe);
         }
     }
 
-    // --- KÉZI BEPAKOLÁS ---
+    // --- ÚJ: KÉZI BEPAKOLÁS (A teljes táskát nézi) ---
     public void InsertMaterialButton()
     {
         if (activeFurnace == null || activeFurnace.isAutomated) return;
 
-        Item itemInHand = InventoryManager.instance.GetSelectedItem(false);
-        if (itemInHand == null) return;
-
-        if (activeFurnace.currentRecipe != null)
+        if (activeFurnace.currentRecipe == null)
         {
-            if (itemInHand == activeFurnace.currentRecipe.ingredients[0].item)
-            {
-                InventoryManager.instance.GetSelectedItem(true);
-                activeFurnace.storedInput++;
-            }
+            ShowWarning("Előbb válassz egy receptet a listából!");
+            return;
+        }
+
+        // Megnézzük, mi kell a recepthez
+        Item requiredItem = activeFurnace.currentRecipe.ingredients[0].item;
+
+        // Ellenőrizzük az egész inventoryt
+        int playerHasAmount = InventoryManager.instance.GetItemCount(requiredItem);
+
+        if (playerHasAmount > 0)
+        {
+            // FIGYELEM: Ha nálad máshogy hívják a törlést, írd át a RemoveItem-et!
+            InventoryManager.instance.RemoveItem(requiredItem, 1);
+            activeFurnace.storedInput++;
         }
         else
         {
-            foreach (CraftingRecipe recipe in allSmeltingRecipes)
-            {
-                if (recipe.ingredients[0].item == itemInHand)
-                {
-                    activeFurnace.currentRecipe = recipe;
-                    InventoryManager.instance.GetSelectedItem(true);
-                    activeFurnace.storedInput++;
-                    UpdateVisuals(recipe);
-                    break;
-                }
-            }
+            ShowWarning($"Nincs nálad: {requiredItem.name}!");
         }
     }
 
@@ -141,11 +155,7 @@ public class FurnaceUI : MonoBehaviour
             activeFurnace.storedOutput--;
             InventoryManager.instance.Additem(activeFurnace.currentRecipe.resultItem);
 
-            if (activeFurnace.storedInput <= 0 && activeFurnace.storedOutput <= 0)
-            {
-                activeFurnace.currentRecipe = null;
-                ClearVisuals();
-            }
+            // A Minecraft logikát (ClearVisuals) kivettük, így megjegyzi a receptet!
         }
     }
 
@@ -161,7 +171,7 @@ public class FurnaceUI : MonoBehaviour
 
     void ClearVisuals()
     {
-        if (recipeNameText != null) recipeNameText.text = "Válassz receptet / Tegyél be anyagot!";
+        if (recipeNameText != null) recipeNameText.text = "Válassz receptet a listából!";
         if (recipeIcon != null) recipeIcon.gameObject.SetActive(false);
     }
 
@@ -174,9 +184,19 @@ public class FurnaceUI : MonoBehaviour
         if (!isOpen)
         {
             activeFurnace = null;
-            frameClosed = Time.frameCount; // --- 4. ÚJ VÉDELEM: Megjegyezzük a bezárás idejét! ---
+            frameClosed = Time.frameCount;
         }
     }
 
-
+    // --- ÚJ: Hibaüzenet megjelenítése ---
+    void ShowWarning(string msg)
+    {
+        if (warningText != null)
+        {
+            warningText.text = msg;
+            warningText.color = Color.red;
+            warningText.gameObject.SetActive(true);
+            warningTimer = 2f;
+        }
+    }
 }
