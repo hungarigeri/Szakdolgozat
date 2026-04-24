@@ -165,6 +165,19 @@ public class ConveyorBelt : MonoBehaviour
                     return;
                 }
             }
+
+            // --- 4. Ellenőrzés: RAKÉTA ---
+            DeliveryRocket rocket = hit.GetComponent<DeliveryRocket>();
+            if (rocket != null)
+            {
+                // Ha a rakétának kell az item (mert a fázis része), akkor elnyeli!
+                if (rocket.AcceptItem(currentItem))
+                {
+                    successfullyPassed = true;
+                    ClearBelt();
+                    return;
+                }
+            }
         }
 
         // --- HA A SZALAG VÉGÉN NINCS SEMMI (vagy a kemence visszautasította, mert oldalról jött) ---

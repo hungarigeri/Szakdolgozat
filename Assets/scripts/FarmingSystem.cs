@@ -12,6 +12,7 @@ public class FarmingSystem : MonoBehaviour
     // --- ÚJ: Mezőgazdasági tárgyak ---
     public Item seedItem;   // A Mag tárgy (ScriptableObject)
     public Item shovelItem; // Az Ásó tárgy (ScriptableObject)
+    public Item rocketItem;
 
     [Header("Prefabok")]
     public GameObject miningDrillPrefab;
@@ -20,8 +21,9 @@ public class FarmingSystem : MonoBehaviour
     public GameObject conveyorPrefab;
     public GameObject basicFurnacePrefab;
     public GameObject automataFurnacePrefab;
-    // --- ÚJ: Növény Prefab ---
     public GameObject cropPrefab;
+
+    public GameObject rocketPrefab;
 
     private float currentPlacementRotation = 0f;
     private Vector2 lastFacingDirection = Vector2.down;
@@ -63,7 +65,7 @@ public class FarmingSystem : MonoBehaviour
         bool isBuildingHeld = false;
 
         // Épületek és a Mag/Ásó ellenőrzése
-        if (selectedItem != null && (selectedItem.name == "CraftingTable" || selectedItem.name == "Furnace" || selectedItem.name == "AutomataFurnace" || selectedItem.name == "Automata Furnace" || selectedItem.name == "MiningDrill" || selectedItem.name == "AutomataDrill" || selectedItem.name == "Barrel" || selectedItem.name == "ConveyorBelt" || selectedItem == seedItem || selectedItem == shovelItem))
+        if (selectedItem != null && (selectedItem.name == "CraftingTable" || selectedItem.name == "Furnace" || selectedItem.name == "AutomataFurnace" || selectedItem.name == "Automata Furnace" || selectedItem.name == "MiningDrill" || selectedItem.name == "AutomataDrill" || selectedItem.name == "Barrel" || selectedItem.name == "ConveyorBelt" || selectedItem == seedItem || selectedItem == shovelItem || selectedItem == rocketItem || selectedItem.name == "Rocket"))
         {
             isBuildingHeld = true;
         }
@@ -146,6 +148,10 @@ public class FarmingSystem : MonoBehaviour
                 Furnace hitFurnace = hit.GetComponent<Furnace>();
                 if (hitFurnace != null) { FurnaceUI.instance.OpenUIForFurnace(hitFurnace); return; }
 
+                //RAKÉTA MEGNYITÁSA ---
+                DeliveryRocket hitRocket = hit.GetComponent<DeliveryRocket>();
+                if (hitRocket != null) { RocketUI.instance.OpenUI(hitRocket); return; }
+
                 // --- ARATÁS ---
                 CropGrowth crop = hit.GetComponent<CropGrowth>();
                 if (crop != null && crop.isGrown)
@@ -164,7 +170,7 @@ public class FarmingSystem : MonoBehaviour
                     if (isFarmableLand && !hasPrefab)
                     {
                         GameManager.Instance.tileManager.TillGround(targetPosition);
-                        return; // Opcionálisan ide jöhet InventoryManager.instance.GetSelectedItem(true) ha elhasználódik az ásó
+                        return;
                     }
                 }
                 // --- VETÉS (Mag elültetése) ---
@@ -216,6 +222,11 @@ public class FarmingSystem : MonoBehaviour
                         Instantiate(automataFurnacePrefab, new Vector3(targetPosition.x + 0.5f, targetPosition.y + 0.5f, 0), Quaternion.Euler(0, 0, currentPlacementRotation));
                         InventoryManager.instance.GetSelectedItem(true);
                     }
+                    else if (selectedItem == rocketItem || selectedItem.name == "Rocket")
+                    {
+                        Instantiate(rocketPrefab, new Vector3(targetPosition.x + 0.5f, targetPosition.y + 0.5f, 0), Quaternion.identity);
+                        InventoryManager.instance.GetSelectedItem(true);
+                    }
                     else
                     {
                         GameManager.Instance.tileManager.PlaceBuilding(targetPosition, selectedItem.name);
@@ -226,7 +237,7 @@ public class FarmingSystem : MonoBehaviour
             // ALAPVETŐ INTERAKCIÓK (Gyűjtögetés)
             else if (isMineableOre) { if (selectedItem != null && selectedItem.name == "Pickaxe") InventoryManager.instance.Additem(ironOreItem); }
             else if (isChoppableTree) { if (selectedItem != null && selectedItem.name == "Axe") InventoryManager.instance.Additem(woodItem); }
-            else if (isFarmableLand) { GameManager.Instance.tileManager.SetInteracted(targetPosition); }
+
         }
     }
 
