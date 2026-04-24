@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Collections.Generic;
 
 public class TileManager : MonoBehaviour
 {
@@ -7,15 +8,25 @@ public class TileManager : MonoBehaviour
     public Tilemap interactableMap; // Földművelés
     public Tilemap oreMap;          // Ércek (Vas)
     public Tilemap treeMap;         // ÚJ: Fák (Favágás)
-    public Tilemap buildingMap;      // Épületek (pl. Munkaasztal)
+    public Tilemap buildingMap;
+    // Épületek (pl. Munkaasztal)
 
     [Header("Tiles")]
     public Tile hiddenInteractableTile;
     public Tile InterectedTile;
-    public Tile munkaasztalTile; // ÚJ: A munkaasztal csempéje
+    public Tile munkaasztalTile;
     public Tile furnaceTile;
     public TileBase tilledTile;
     public Tilemap grassMap;
+    public TileBase grassTile;
+    public float soilDecayTime = 60f; // Hány másodperc után tűnjön el a megművelt föld (Pl. 60 mp)
+
+    // Ez a "láthatatlan lista", ami megjegyzi: [Melyik csempe] -> [Mikor lett felásva]
+    private Dictionary<Vector3Int, float> tilledTilesTracker = new Dictionary<Vector3Int, float>();
+
+    [Header("Mezőgazdasági beállítások")]
+    public Item seedItem; // Ide is húzd be a magot!
+    public float digSeedDropChance = 10f; // Alapból 10% esély
 
     void Start()
     {
@@ -25,6 +36,43 @@ public class TileManager : MonoBehaviour
             if (tile != null && tile.name == "Interactable_visible")
             {
                 interactableMap.SetTile(position, hiddenInteractableTile);
+            }
+        }
+    }
+
+    void Update()
+    {
+        // Csinálunk egy ideiglenes listát azokról, amiknek lejárt az ideje
+        List<Vector3Int> expiredTiles = new List<Vector3Int>();
+
+        // 1. Végignézzük az összes felásott földet
+        foreach (var kvp in tilledTilesTracker)
+        {
+            // kvp.Key = A koordináta, kvp.Value = Amikor felástuk
+            // Ha a mostani időből kivonva az ásás idejét, több telt el, mint a megengedett (pl. 60mp):
+            if (Time.time - kvp.Value >= soilDecayTime)
+            {
+                expiredTiles.Add(kvp.Key);
+            }
+        }
+
+        // 2. Végigmegyünk a lejárt földeken
+        foreach (Vector3Int pos in expiredTiles)
+        {
+            // Megnézzük, VETETTEK-E BELE NÖVÉNYT? (Van-e valami a közepén)
+            Collider2D hit = Physics2D.OverlapPoint(new Vector2(pos.x + 0.5f, pos.y + 0.5f));
+
+            if (hit != null && hit.GetComponent<CropGrowth>() != null)
+            {
+                // HA VAN BENNE NÖVÉNY: Nem tüntetjük el a földet! 
+                // Újraindítjuk az időzítőt, hogy majd aratás után kezdjen el újra ketyegni.
+                tilledTilesTracker[pos] = Time.time;
+            }
+            else
+            {
+                // HA ÜRES: Visszanő a fű!
+                grassMap.SetTile(pos, grassTile); // Visszatesszük a füvet
+                tilledTilesTracker.Remove(pos);   // Levesszük a figyelőlistáról
             }
         }
     }
@@ -114,8 +162,14 @@ public class TileManager : MonoBehaviour
     {
         if (IsInteractable(position))
         {
-            // A fű csempét egyenesen kicseréljük a megművelt barna sárra
             grassMap.SetTile(position, tilledTile);
+            tilledTilesTracker[position] = Time.time;
+
+            // VÉLETLEN: Kifordul-e egy mag a földből?
+            if (Random.Range(0f, 100f) <= digSeedDropChance && seedItem != null)
+            {
+                InventoryManager.instance.Additem(seedItem);
+            }
         }
     }
     // Ezt keresi a FarmingSystem, hogy tudja, vethet-e magot!

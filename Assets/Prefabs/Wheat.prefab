@@ -126,7 +126,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.008491412, y: 0.016521633}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -136,7 +136,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.3611184, y: 0.50817096}
   m_EdgeRadius: 0
 --- !u!114 &3311515254027381749
 MonoBehaviour:
@@ -153,4 +153,6 @@ MonoBehaviour:
   grownSprite: {fileID: 6694952647016253675, guid: 528ea63683b7bb5489d3f92ce38af828, type: 3}
   harvestedItem: {fileID: 11400000, guid: 5be987e489a47bc448bd046f16ee0578, type: 2}
   yieldAmount: 1
+  seedItem: {fileID: 11400000, guid: e47350b1bbb04b8429b60ea501584630, type: 2}
+  seedDropChance: 50
   isGrown: 0

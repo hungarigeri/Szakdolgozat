@@ -3,15 +3,16 @@ using UnityEngine;
 public class CropGrowth : MonoBehaviour
 {
     [Header("Grafika")]
-    public Sprite grownSprite; 
+    public Sprite grownSprite;
     private SpriteRenderer sr;
 
     [Header("Aratás Beállításai")]
     public Item harvestedItem; // Mit ad a növény? (Pl. Búza Item)
     public int yieldAmount = 1; // Mennyit adjon?
-
+    public Item seedItem;
+    public float seedDropChance = 80f;
     // Public lett, hogy a FarmingSystem is lássa, megnőtt-e már!
-    public bool isGrown = false; 
+    public bool isGrown = false;
 
     void Start()
     {
@@ -22,7 +23,7 @@ public class CropGrowth : MonoBehaviour
     System.Collections.IEnumerator Grow()
     {
         yield return new WaitForSeconds(5f); // 5 másodperc növekedés
-        sr.sprite = grownSprite; 
+        sr.sprite = grownSprite;
         isGrown = true;
     }
 
@@ -31,14 +32,17 @@ public class CropGrowth : MonoBehaviour
     {
         if (isGrown)
         {
-            // Odaadja a játékosnak a kész terményt
-            if (harvestedItem != null)
+            // 1. A termés (pl. búza) mindig jár
+            if (harvestedItem != null) InventoryManager.instance.Additem(harvestedItem);
+
+            // 2. VÉLETLEN: Kapunk-e magot is?
+            float randomValue = Random.Range(0f, 100f);
+            if (randomValue <= seedDropChance && seedItem != null)
             {
-                InventoryManager.instance.Additem(harvestedItem);
-                // Ha többet akarsz adni: (Ide írhatsz egy for ciklust, ha yieldAmount > 1)
+                InventoryManager.instance.Additem(seedItem);
+                Debug.Log("Szerencse! Kaptál egy magot is.");
             }
 
-            // Eltűnik a növény a földről
             Destroy(gameObject);
         }
     }

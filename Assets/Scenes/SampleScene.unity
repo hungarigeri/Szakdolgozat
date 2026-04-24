@@ -8332,7 +8332,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1111149464
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8581,7 +8581,7 @@ RectTransform:
   m_Father: {fileID: 196068239}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -9825,6 +9825,8 @@ MonoBehaviour:
   furnaceTile: {fileID: 11400000, guid: 30c67f33acc0cd341a441cdfad8b3b93, type: 2}
   tilledTile: {fileID: 11400000, guid: 1ad3dc4081e69904faa6df3455beaf2c, type: 2}
   grassMap: {fileID: 1777466031}
+  grassTile: {fileID: 11400000, guid: 3c7a5da224d5afc4bba766a16168c17e, type: 2}
+  soilDecayTime: 15
 --- !u!114 &1279436274
 MonoBehaviour:
   m_ObjectHideFlags: 0
